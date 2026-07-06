@@ -34,10 +34,24 @@ const STORAGE_KEY = 'akash-portfolio-game-progress';
 const VISITED_KEY = 'akash-portfolio-visited-sections';
 let clearedForThisPageLoad = false;
 
+function getStorage() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const storage = window.localStorage;
+    const testKey = `${STORAGE_KEY}-test`;
+    storage.setItem(testKey, '1');
+    storage.removeItem(testKey);
+    return storage;
+  } catch {
+    return null;
+  }
+}
+
 function clearStoredProgressOnPageLoad() {
   if (typeof window === 'undefined' || clearedForThisPageLoad) return;
-  window.localStorage.removeItem(STORAGE_KEY);
-  window.localStorage.removeItem(VISITED_KEY);
+  const storage = getStorage();
+  storage?.removeItem(STORAGE_KEY);
+  storage?.removeItem(VISITED_KEY);
   clearedForThisPageLoad = true;
 }
 
@@ -57,7 +71,8 @@ export function readProgress(): GameProgress {
   clearStoredProgressOnPageLoad();
 
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null') as Partial<GameProgress> | null;
+    const storage = getStorage();
+    const parsed = JSON.parse(storage?.getItem(STORAGE_KEY) ?? 'null') as Partial<GameProgress> | null;
     return {
       ...getDefaultProgress(),
       ...parsed,
@@ -71,7 +86,7 @@ export function readProgress(): GameProgress {
 }
 
 export function writeProgress(progress: GameProgress) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  getStorage()?.setItem(STORAGE_KEY, JSON.stringify(progress));
   window.dispatchEvent(new CustomEvent(PROGRESS_EVENT, { detail: progress }));
 }
 
@@ -104,7 +119,7 @@ export function getLevel(xp: number) {
 
 export function readVisitedSections() {
   try {
-    return JSON.parse(window.localStorage.getItem(VISITED_KEY) ?? '[]') as string[];
+    return JSON.parse(getStorage()?.getItem(VISITED_KEY) ?? '[]') as string[];
   } catch {
     return [];
   }
@@ -114,7 +129,7 @@ export function markSectionVisited(id: string) {
   const visited = new Set(readVisitedSections());
   const sizeBefore = visited.size;
   visited.add(id);
-  window.localStorage.setItem(VISITED_KEY, JSON.stringify([...visited]));
+  getStorage()?.setItem(VISITED_KEY, JSON.stringify([...visited]));
 
   if (visited.size > sizeBefore) {
     addXp(id === 'about' ? 10 : 15);
