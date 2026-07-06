@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  cursor: none;
+}
+
+body {
+  background: #1a0000;
+  font-family: 'Kanit', sans-serif;
+  cursor: none;
+}
+
+#root {
+  background: #1a0000;
+}
+
+button,
+a {
+  cursor: none;
+}
+
+.hero-heading {
+  background: linear-gradient(180deg, #8b3a3a 0%, #ffb3b3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Scroll progress bar */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #8b0000, #ff3333);
+  z-index: 9990;
+  transform-origin: left;
+  box-shadow: 0 0 8px rgba(255, 50, 50, 0.6);
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+/* Remove default focus outlines for aesthetic, add custom */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(255, 80, 80, 0.6);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Keyframes */
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-3%, 5%) scale(1.05); }
+  66% { transform: translate(4%, -3%) scale(0.97); }
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(5%, -4%) scale(1.06); }
+  66% { transform: translate(-3%, 5%) scale(0.96); }
+}
+@keyframes orbFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-6%, 8%) scale(1.1); }
+}
+
+@keyframes marqueeLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+@keyframes marqueeRight {
+  0% { transform: translateX(-33.333%); }
+  100% { transform: translateX(0); }
+}
