@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin — Contact Messages</title>
+    <style>
+      body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: #0b0000; color: #e6eef3; padding: 28px; }
+      input, button { padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(200,200,200,0.08); }
+      table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+      th, td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); text-align: left; }
+      .muted { color: rgba(230,238,243,0.6); font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Contact Messages — Admin</h1>
+    <p class="muted">Enter admin key (stored in Vercel as <code>ADMIN_VIEW_KEY</code>) then click <em>Load</em>.</p>
+
+    <div>
+      <input id="key" placeholder="Enter admin key" style="width:360px;" />
+      <button id="load">Load</button>
+      <span id="status" style="margin-left:12px" class="muted"></span>
+    </div>
+
+    <div id="table-wrap"></div>
+
+    <script>
+      const loadBtn = document.getElementById('load');
+      const keyInput = document.getElementById('key');
+      const status = document.getElementById('status');
+      const wrap = document.getElementById('table-wrap');
+
+      async function loadMessages() {
+        status.textContent = 'Loading...';
+        wrap.innerHTML = '';
+        try {
+          const key = keyInput.value.trim();
+          if (!key) { status.textContent = 'Enter admin key'; return; }
+
+          const res = await fetch('/api/messages', { headers: { 'x-admin-key': key } });
+          if (res.status === 401) { status.textContent = 'Unauthorized — bad key'; return; }
+          if (!res.ok) { status.textContent = 'Error fetching messages'; return; }
+          const data = await res.json();
+          if (!Array.isArray(data) || data.length === 0) { status.textContent = 'No messages'; return; }
+
+          const table = document.createElement('table');
+          const thead = document.createElement('thead');
+          thead.innerHTML = '<tr><th>When</th><th>Name</th><th>Email</th><th>Subject</th><th>Message</th></tr>';
+          table.appendChild(thead);
+          const tbody = document.createElement('tbody');
+
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            const when = new Date(row.created_at).toLocaleString();
+            tr.innerHTML = `<td>${when}</td><td>${escapeHtml(row.name)}</td><td>${escapeHtml(row.email)}</td><td>${escapeHtml(row.subject||'')}</td><td>${escapeHtml(row.message)}</td>`;
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          wrap.appendChild(table);
+          status.textContent = '';
+        } catch (err) {
+          status.textContent = err.message || 'Error';
+        }
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[s]);
+      }
+
+      loadBtn.addEventListener('click', loadMessages);
+      keyInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') loadMessages(); });
+    </script>
+  </body>
+</html>
