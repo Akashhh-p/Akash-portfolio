@@ -13,6 +13,10 @@ export default function ThreeDSphere({ size = 340 }: { size?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const angleRef = useRef(0);
   const rafRef = useRef<number>(0);
+  const targetTiltX = useRef(0.25);
+  const targetTiltY = useRef(0);
+  const tiltX = useRef(0.25);
+  const tiltY = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -30,7 +34,6 @@ export default function ThreeDSphere({ size = 340 }: { size?: number }) {
     const cy = size / 2;
     const fov = size * 1.5;
 
-    // Generate points on sphere surface (icosphere-like distribution)
     const points: Point3D[] = [];
     const rings = 14;
     const pointsPerRing = 18;
@@ -60,38 +63,43 @@ export default function ThreeDSphere({ size = 340 }: { size?: number }) {
     const rotateY = (p: Point3D, angle: number) => {
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
-      return {
-        ...p,
-        x: p.ox * cos - p.oz * sin,
-        z: p.ox * sin + p.oz * cos,
-        y: p.oy,
-      };
+      return { ...p, x: p.ox * cos - p.oz * sin, z: p.ox * sin + p.oz * cos, y: p.oy };
     };
 
     const rotateX = (p: Point3D, angle: number) => {
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
-      return {
-        ...p,
-        y: p.y * cos - p.z * sin,
-        z: p.y * sin + p.z * cos,
-      };
+      return { ...p, y: p.y * cos - p.z * sin, z: p.y * sin + p.z * cos };
     };
+
+    const onPointerMove = (e: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      targetTiltY.current = nx * 0.5;
+      targetTiltX.current = 0.25 + ny * 0.35;
+    };
+    const onPointerLeave = () => {
+      targetTiltY.current = 0;
+      targetTiltX.current = 0.25;
+    };
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerleave', onPointerLeave);
 
     const draw = () => {
       ctx.clearRect(0, 0, size, size);
 
       angleRef.current += 0.004;
-      const tiltAngle = 0.25;
+      tiltX.current += (targetTiltX.current - tiltX.current) * 0.06;
+      tiltY.current += (targetTiltY.current - tiltY.current) * 0.06;
 
       const rotated = points.map((p) => {
-        const ry = rotateY(p, angleRef.current);
-        return rotateX(ry, tiltAngle);
+        const ry = rotateY(p, angleRef.current + tiltY.current);
+        return rotateX(ry, tiltX.current);
       });
 
       const projected = rotated.map((p) => ({ ...p, ...project(p) }));
 
-      // Draw connections between nearby points
       for (let i = 0; i < projected.length; i++) {
         for (let j = i + 1; j < projected.length; j++) {
           const a = projected[i];
@@ -103,32 +111,30 @@ export default function ThreeDSphere({ size = 340 }: { size?: number }) {
 
           if (dist < R * 0.52) {
             const avgDepth = (a.depth + b.depth) / 2;
-            const opacity = 0.08 + avgDepth * 0.22;
+            const opacity = 0.06 + avgDepth * 0.24;
             ctx.beginPath();
             ctx.moveTo(a.sx, a.sy);
             ctx.lineTo(b.sx, b.sy);
-            ctx.strokeStyle = `rgba(255, ${Math.floor(40 + avgDepth * 60)}, ${Math.floor(40 + avgDepth * 40)}, ${opacity})`;
-            ctx.lineWidth = 0.5 + avgDepth * 0.5;
+            ctx.strokeStyle = `rgba(255, ${Math.floor(30 + avgDepth * 70)}, ${Math.floor(30 + avgDepth * 50)}, ${opacity})`;
+            ctx.lineWidth = 0.4 + avgDepth * 0.6;
             ctx.stroke();
           }
         }
       }
 
-      // Draw points
       for (const p of projected) {
-        const r = 1.2 + p.depth * 2;
-        const opacity = 0.3 + p.depth * 0.7;
+        const r = 1.2 + p.depth * 2.2;
+        const opacity = 0.25 + p.depth * 0.75;
         ctx.beginPath();
         ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, ${Math.floor(60 + p.depth * 80)}, ${Math.floor(60 + p.depth * 60)}, ${opacity})`;
+        ctx.fillStyle = `rgba(255, ${Math.floor(50 + p.depth * 90)}, ${Math.floor(50 + p.depth * 70)}, ${opacity})`;
         ctx.fill();
 
-        // Glow on front-facing points
-        if (p.depth > 0.6) {
+        if (p.depth > 0.55) {
           ctx.beginPath();
-          ctx.arc(p.sx, p.sy, r * 2.5, 0, Math.PI * 2);
-          const grad = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 2.5);
-          grad.addColorStop(0, `rgba(255,80,80,${(p.depth - 0.6) * 0.5})`);
+          ctx.arc(p.sx, p.sy, r * 3, 0, Math.PI * 2);
+          const grad = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3);
+          grad.addColorStop(0, `rgba(255,90,90,${(p.depth - 0.55) * 0.6})`);
           grad.addColorStop(1, 'transparent');
           ctx.fillStyle = grad;
           ctx.fill();
@@ -139,17 +145,12 @@ export default function ThreeDSphere({ size = 340 }: { size?: number }) {
     };
 
     rafRef.current = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(rafRef.current);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerleave', onPointerLeave);
+    };
   }, [size]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        width: size,
-        height: size,
-        display: 'block',
-      }}
-    />
-  );
+  return <canvas ref={canvasRef} style={{ width: size, height: size, display: 'block' }} />;
 }

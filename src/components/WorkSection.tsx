@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Eye } from 'lucide-react';
 import { logProjectView, getProjectViewCounts } from '../lib/supabase';
+import WireframeCube from './WireframeCube';
 
 interface Project {
   slug: string;
@@ -278,16 +279,27 @@ export default function WorkSection() {
       style={{ background: '#1a0000' }}
     >
       {/* Section header */}
-      <div ref={headingRef} className="flex items-end justify-between mb-16 md:mb-20">
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
-          className="hero-heading font-black uppercase leading-none tracking-tight"
-          style={{ fontSize: 'clamp(2.5rem, 9vw, 8rem)' }}
-        >
-          Selected<br />Work
-        </motion.h2>
+      <div ref={headingRef} className="flex items-end justify-between mb-16 md:mb-20 relative">
+        <div className="flex items-end gap-6 md:gap-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
+            animate={isInView ? { opacity: 1, scale: 1, rotate: 0 } : {}}
+            transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+            className="hidden md:block flex-shrink-0"
+            style={{ marginBottom: '0.5rem' }}
+          >
+            <WireframeCube size={140} />
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
+            className="hero-heading font-black uppercase leading-none tracking-tight"
+            style={{ fontSize: 'clamp(2.5rem, 9vw, 8rem)' }}
+          >
+            Selected<br />Work
+          </motion.h2>
+        </div>
         <motion.a
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}

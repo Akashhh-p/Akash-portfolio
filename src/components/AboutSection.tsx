@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Briefcase, ExternalLink } from 'lucide-react';
+import TiltCard from './TiltCard';
 
 const STATS = [
   { value: '8.8', label: 'GPA Score', suffix: '/10' },
@@ -191,18 +192,54 @@ export default function AboutSection() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ delay: 0.15, duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
-            className="relative overflow-hidden"
-            style={{
-              borderRadius: 'clamp(20px, 3vw, 36px)',
-              aspectRatio: '4/5',
-              background: 'linear-gradient(160deg, #f5f0f0 0%, #fde8e8 60%, #f5e0e0 100%)',
-            }}
           >
-            <img
-              src="/Akash-removebg-preview.png"
-              alt="Akash Pentakota"
-              className="w-full h-full object-contain object-bottom"
-            />
+            <TiltCard
+              maxTilt={10}
+              className="relative overflow-hidden"
+              style={{
+                borderRadius: 'clamp(20px, 3vw, 36px)',
+                aspectRatio: '4/5',
+                background: 'linear-gradient(160deg, #f5f0f0 0%, #fde8e8 60%, #f5e0e0 100%)',
+                boxShadow: '0 30px 60px -20px rgba(120,0,0,0.35)',
+              }}
+            >
+              <img
+                src="/Akash-removebg-preview.png"
+                alt="Akash Pentakota"
+                className="w-full h-full object-contain object-bottom"
+                style={{ transform: 'translateZ(40px)' }}
+              />
+              <motion.div
+                aria-hidden="true"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
+                className="absolute -top-10 -right-10 rounded-full pointer-events-none"
+                style={{
+                  width: 90,
+                  height: 90,
+                  border: '1px dashed rgba(180,0,0,0.35)',
+                  transform: 'translateZ(70px)',
+                }}
+              />
+              <motion.div
+                aria-hidden="true"
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute bottom-5 left-5 rounded-2xl pointer-events-none"
+                style={{
+                  width: 56,
+                  height: 56,
+                  background: 'linear-gradient(135deg, rgba(204,0,0,0.9), rgba(139,0,0,0.7))',
+                  boxShadow: '0 10px 30px rgba(180,0,0,0.4)',
+                  transform: 'translateZ(90px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <span className="text-white font-black" style={{ fontSize: '1.1rem' }}>AI</span>
+              </motion.div>
+            </TiltCard>
           </motion.div>
 
           <div className="grid grid-cols-2 gap-4">
