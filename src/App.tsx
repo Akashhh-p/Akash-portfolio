@@ -8,12 +8,10 @@ import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import MarqueeSection from './components/MarqueeSection';
 import WorkSection from './components/WorkSection';
-import AIMiniGameSection from './components/AIMiniGameSection';
 import AboutSection from './components/AboutSection';
 import CertificationsSection from './components/CertificationsSection';
 import SkillsSection from './components/SkillsSection';
 import ContactSection from './components/ContactSection';
-import GamificationLayer from './components/GamificationLayer';
 
 function ScrollProgressBar() {
   const { scrollYProgress } = useScroll();
@@ -39,7 +37,6 @@ export default function App() {
       <GrainOverlay />
       <BackgroundOrbs />
       <ScrollProgressBar />
-      <GamificationLayer />
       <Header />
 
       <div
@@ -69,7 +66,6 @@ export default function App() {
           <CertificationsSection />
         </div>
 
-        <AIMiniGameSection />
         <ContactSection />
       </div>
     </>
