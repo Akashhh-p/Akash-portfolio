@@ -3,7 +3,20 @@ import { motion, useInView } from 'framer-motion';
 import { Eye } from 'lucide-react';
 import { logProjectView, getProjectViewCounts } from '../lib/supabase';
 
-const PROJECTS = [
+interface Project {
+  slug: string;
+  num: string;
+  name: string;
+  category: string;
+  year: string;
+  tags: string[];
+  description: string;
+  github: string;
+  image: string;
+  live?: string;
+}
+
+const PROJECTS: Project[] = [
   {
     slug: 'motion-guard-ai',
     num: '01',
@@ -14,6 +27,7 @@ const PROJECTS = [
     description: 'Real-time surveillance platform with automated motion detection, multi-object tracking, and scalable video analytics pipelines optimized for low-latency inference.',
     github: 'https://github.com/Akashhh-p',
     image: 'https://images.pexels.com/photos/3861958/pexels-photo-3861958.jpeg?auto=compress&cs=tinysrgb&w=900',
+    live: 'https://motionguard.vercel.app/',
   },
   {
     slug: 'multimodal-emotion-recognition',
@@ -36,11 +50,12 @@ const PROJECTS = [
     description: 'Oceanautics internship project: built AwakeMate, an AI wellness monitoring platform analyzing behavioral and sleep patterns to deliver personalized recommendations for marine robotics workflows.',
     github: 'https://github.com/Akashhh-p',
     image: 'https://images.pexels.com/photos/1181316/pexels-photo-1181316.jpeg?auto=compress&cs=tinysrgb&w=900',
+    live: 'https://awake-mate.vercel.app/',
   },
 ];
 
 interface ProjectRowProps {
-  project: (typeof PROJECTS)[0];
+  project: Project;
   index: number;
   viewCount: number;
   onView: (slug: string, name: string) => void;
@@ -121,7 +136,7 @@ function ProjectRow({ project, index, viewCount, onView }: ProjectRowProps) {
 
       {/* Row content */}
       <a
-        href={project.github}
+        href={project.live ?? project.github}
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleClick}
@@ -150,6 +165,19 @@ function ProjectRow({ project, index, viewCount, onView }: ProjectRowProps) {
 
         {/* Meta */}
         <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+          {project.live && (
+            <span
+              className="flex items-center gap-1.5 font-medium uppercase tracking-widest"
+              style={{ fontSize: '0.5rem', color: '#22c55e' }}
+            >
+              <motion.span
+                animate={{ opacity: [1, 0.35, 1], scale: [1, 0.7, 1] }}
+                transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,0.8)', display: 'inline-block' }}
+              />
+              Live
+            </span>
+          )}
           <span
             className="text-[#D7E2EA] font-light uppercase tracking-widest"
             style={{ fontSize: 'clamp(0.55rem, 0.9vw, 0.75rem)', opacity: 0.4 }}
